@@ -8,16 +8,15 @@ import getpass
 	#client_secret='FIKkxfmqKdlst2etbot6pjaLtf8',
 	#password='XemogDev',
 	#username='Xemog_Dev')
-#viewSubmission displays the top 20 comments using the user selection
-#This function needs work, but I'm not sure the direction to take it in yet
-loggedIn = False
+
+#User Infor
 reddit = praw.Reddit(client_id='0rDPWpdN0p5rnA',
 	client_secret='FIKkxfmqKdlst2etbot6pjaLtf8',
 	user_agent='test scripts',
 	password='XemogDev',
 	username='Xemog_Dev')
+
 def Main():
-	
 	menu = {}
 	menu['1']="Homepage"
 	menu['2']="Choose Subreddit"
@@ -35,13 +34,60 @@ def Main():
 			chooseSubreddit('hot'," ")
 		if menuSelect =='3':
 			break
-
+#This probably doesn't need to be it's own function since I only call it once
 def printParentNewline():
 	print('{0:6}|{1:9}|{2:100.100}'.format('______','_________','_________________________________________________________________________________________________________'))
 
-def leaveComment():
-	print("lravecomment")
-def displayReplies(replies,depth):
+#This is a mess
+#0 and 1 don't need to be looped over, they are replying to either the OP or first comment
+#If anything greater than 1 is entered, we just re-iterate over the comments in the same order that they are entered
+#I bet that if some1 comments in between the time that you load the page and the time that you comment, you reply could be posted to the wrong comment
+def leaveComment(submission,comment):
+	replyCommentNum = input("Enter the number of the comment you want to reply too, or Enter '0' to reply to the OP:")
+	try:	
+		if replyCommentNum == '0':
+			commentText = input("Enter your reply:")
+			submission.reply(commentText)
+		if replyCommentNum == '1':
+			commentText = input("Enter your comment:")
+			comment.reply(commentText)
+		else:
+			commentNum = 1
+			for replies in comment.replies:
+				if isinstance(replies, MoreComments):
+					continue
+				commentNum = commentNum + 1
+				if int(commentNum) == int(replyCommentNum):
+					commentText = input("Enter your comment:")
+					replies.reply(commentText)
+					break
+				for children in replies.replies:
+					if isinstance(children, MoreComments):
+						continue
+					commentNum = commentNum + 1 
+					if commentNum == replyCommentNum:
+						commentText = input("Enter your comment:")
+						children.reply(commentText)
+						break
+					for toddler in children.replies:
+						if isinstance(toddler, MoreComments):
+							continue
+						commentNum = commentNum + 1 
+						if commentNum == replyCommentNum:
+							commentText = input("Enter your comment:")
+							toddler.reply(commentText)
+							break
+						for baby in toddler.replies:
+							if isinstance(baby, MoreComments):
+								continue
+							commentNum = commentNum + 1
+							if commentNum == replyCommentNum:
+								commentText = input("Enter your comment:")
+								baby.reply(commentText)
+								break
+	except errorPosting as error:
+		print("There was an error posting your comment")
+def displayReplies(replies,depth,commentNum):
 	varY = 1
 	depthHolder = ""
 	width = depth
@@ -61,11 +107,11 @@ def displayReplies(replies,depth):
 
 	while varY <= (math.ceil(len(commentBody)/100)):
 		if varY == 1:
-			print('{0:6}{1:5}|{2:9.9}|{3}'.format(depthHolder,replies.score,replies.author.name,str(commentBody[(varY-1)*(100-((depth+1)*5)):varY*(100-((depth+1)*5))])))
+			print('{0:6}{1:2}|{2:5}|{3:9.9}|{4}'.format(depthHolder,commentNum,replies.score,replies.author.name,str(commentBody[(varY-1)*(100-((depth+1)*5)):varY*(100-((depth+1)*5))])))
 		else:
-			print('{0:6}{1:5}|{2:9.9}|{3}'.format(depthHolder,"     "," ",str(commentBody[(varY-1)*(100-((depth+1)*5)):varY*(100-((depth+1)*5))])))
+			print('{0:6}{1:2}|{2:5}|{3:9.9}|{4}'.format(depthHolder,"  "," ","  ",str(commentBody[(varY-1)*(100-((depth+1)*5)):varY*(100-((depth+1)*5))])))
 		varY = varY + 1
-	print('{0:6}{1:5}|{2:9}|{3}'.format(depthHolder,'     ','_________',widthHolder))
+	print('{0:6}{1:2}|{2:5}|{3:9}|{4}'.format(depthHolder,'  ','_____','_________',widthHolder))
 	
 def displayLastComment(lineCount):
 	print("This is under construction")
@@ -84,53 +130,51 @@ def viewSubmission(subId,chosenSubreddit,sortBy):
 		#This logic splits comments longer than 100 characters into multiples lines
 		#It allows us to keep the formatting without longer comments running onto multiples lines
 		#
-		print('{0:6}.{1:9}.{2:100.100}'.format('______','_________','_________________________________________________________________________________________________________'))
+		print('{0:6}.{1:9}.{2:100.100}'.format('______','_________','______________________________________________________________________________________________________'))#i removed 3
 		while varX <= (math.ceil(len(body)/100)):
 			if varX == 1:
-				print('{0:6}|{1:9.9}|{2:100.100}'.format(comment.score,comment.author.name,str(body[(varX-1)*100:varX*100])))
+				print('{0:2}{1:4}|{2:9.9}|{3:97.97}'.format(commentNum,comment.score,comment.author.name,str(body[(varX-1)*97:varX*97])))
 			else:
-				print('{0:6}|{1:9}|{2:100}'.format(" "," ",str(body[(varX-1)*100:varX*100])))
+				print('{0:6}|{1:9}|{2:100}'.format(" "," ",str(body[(varX-1)*97:varX*97])))
 			varX = varX + 1
 			
-		printParentNewline()#this is 120 characters long
-		print(commentNum)
-		
+		printParentNewline()#this is 120 characters long		
 		for replies in comment.replies:
 			depth = 1
 			if isinstance(replies, MoreComments):
 				continue
 			commentNum = commentNum + 1 
-			displayReplies(replies,depth)
+			displayReplies(replies,depth,commentNum)
 			for children in replies.replies:
 				depth = 2
 				if isinstance(children, MoreComments):
 					continue
 				commentNum = commentNum + 1 
-				displayReplies(children,depth)
+				displayReplies(children,depth,commentNum)
 				for toddler in children.replies:
 					depth = 3
 					if isinstance(toddler, MoreComments):
 						continue
 					commentNum = commentNum + 1 
-					displayReplies(toddler,depth)
+					displayReplies(toddler,depth,commentNum)
 					for baby in toddler.replies:
 						depth = 4
 						if isinstance(baby, MoreComments):
 							continue
 						commentNum = commentNum + 1 
-						displayReplies(baby,depth)
-			print(" ")
-			userNext = input("'Enter','Back','Menu','Comment':")
-			if userNext == 'Menu':
-				chooseSubreddit(sortBy,chosenSubreddit)
-			if userNext == 'Next':
-				continue
-			if userNext == 'Back':
-				displayLastComment(lineCount)
-			if userNext == 'Comment':
-				leaveComment()
-			lineCount = 1
-			x = x + 1
+						displayReplies(baby,depth,commentNum)
+		print(" ")
+		userNext = input("'Enter','Back','Menu','Comment':")
+		if userNext == 'Menu':
+			chooseSubreddit(sortBy,chosenSubreddit)
+		if userNext == 'Next':
+			continue
+		if userNext == 'Back':
+			displayLastComment(lineCount)
+		if userNext == 'Comment':
+			leaveComment(submission,comment)
+		lineCount = 1
+		x = x + 1
 	print(" ")
 
 #chooseSubreddit displays the top 20 posts based on the user entry.
