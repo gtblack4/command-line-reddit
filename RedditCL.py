@@ -9,7 +9,7 @@ import getpass
 	#password='XemogDev',
 	#username='Xemog_Dev')
 
-#User Infor
+#User
 reddit = praw.Reddit(client_id='0rDPWpdN0p5rnA',
 	client_secret='FIKkxfmqKdlst2etbot6pjaLtf8',
 	user_agent='test scripts',
@@ -46,7 +46,7 @@ def chooseSubreddit(sortBy,chosenSubreddit):
 	print(" ")
 	try:
 
-		
+		#The formatting for this is fucking shit. Replace this
 		print('{0}{1}{2}{3}{4}'.format("Here are the ", sortBy ," posts in '/R/",chosenSubreddit,"'"))
 		print('{0:4.4}|{1:6.6}|{2:8.8}|{3:100.100}'.format("Menu","Score","Comments","Title"))
 		if sortBy == 'hot':
@@ -151,9 +151,11 @@ def displayReplies(replies,depth,commentNum):
 			print('{0:6}{1:2}|{2:5}|{3:9.9}|{4}'.format(depthHolder,"  "," ","  ",str(commentBody[(varY-1)*(100-((depth+1)*5)):varY*(100-((depth+1)*5))])))
 		varY = varY + 1
 	print('{0:6}{1:2}|{2:5}|{3:9}|{4}'.format(depthHolder,'  ','_____','_________',widthHolder))
-	
+def displayLastComment(linecount):
+	print("The back button doesn't work yet. Try something else")
 def commentMenu(sortBy,chosenSubreddit,submission,comment,commentIdArray):
-	userNext = input("'Enter','Back','Menu','Comment':")
+	#The Back button doesn't work, somebody fix this
+	userNext = input("'Press Enter to Scroll','Back','Menu','Comment':")
 	if userNext == 'Menu':
 		chooseSubreddit(sortBy,chosenSubreddit)
 	
@@ -206,8 +208,9 @@ def viewSubmission(subId,chosenSubreddit,sortBy):
 			else:
 				print('{0:6}|{1:9}|{2:100}'.format(" "," ",str(body[(varX-1)*97:varX*97])))
 			varX = varX + 1
-			print('{0:6}|{1:9}|{2:100.100}'.format('______','_________','_________________________________________________________________________________________________________'))	
+		print('{0:6}|{1:9}|{2:100.100}'.format('______','_________','_________________________________________________________________________________________________________'))	
 		commentIdArray.append(comment.id)
+		#This needs to be replaced with a more procedural function instead of hard coding a certain number of responses
 		for replies in comment.replies:
 			depth = 1
 			if isinstance(replies, MoreComments):
