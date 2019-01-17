@@ -1,32 +1,21 @@
-
 import praw
 from praw.models import MoreComments
 import textwrap
 import math
 import getpass
-import os
-from configFile import *
+#User Information -- Please Don't steal my account
+#If You want to have your own credentials stored you will need to create an app in your user settings
 
-#Check to see if a user is logged in
-print("")
-try:
-	print(reddit.user.me())
-except:
-	print("The user login failed. Please Check the configFile to ensure you have proper credentials")
-	print("Otherwise you can continue is read-only mode")
-	readOnly = True
-def getWindowSize():
-	global displayHeight
-	if(os.get_terminal_size().lines < 10):
-		displayHeight = os.get_terminal_size().lines
-	else:
-		displayHeight = os.get_terminal_size().lines - 10
-	consoleY = os.get_terminal_size().columns
+ reddit = praw.Reddit(client_id='1I-oGV69RGLFZA',
+ 	client_secret='lKB-ZBfYwaeY_TZr_TRieud6T0A',	
+ 	user_agent='A Python CommandLine Application to browse Reddit',
+ 	username='gtblack4_DEV',
+ 	password='BlackPythonDev')
+print(reddit.auth.url(['identity'], '...', 'permanent'))
 
 
 #Main Menu
 def Main():
-	getWindowSize()
 	menu = {}
 	menu['1']="Homepage"
 	menu['2']="Choose Subreddit"
@@ -42,8 +31,6 @@ def Main():
 			chooseSubreddit('hot',"all")
 		if menuSelect =='2':
 			chooseSubreddit('hot'," ")
-			print(reddit.auth.authorize(code))
-			print(reddit.user.me())
 		if menuSelect =='3':
 			break
 			print("")
@@ -51,8 +38,7 @@ def Main():
 
 #This function takes 2 variables [SortBy] describes how to display the posts(New, Top, All) and [chosenSubreddit] which is the chosen subreddit...
 def chooseSubreddit(sortBy,chosenSubreddit):
-	#SubmissionIdArray is an array of all the submissions, when the user selects a post to view, it pulls the corresponding ID and loads the comments for that post
-
+	#SubmissionIdArray is an array of all the lsiten submissions, when the user selects a post to view, it pulls the corresponding ID and loads the comments for that post
 	submissionIdArray = []
 	print(" ")
 	if chosenSubreddit == " ":
@@ -67,17 +53,17 @@ def chooseSubreddit(sortBy,chosenSubreddit):
 		print('{0}{1}{2}{3}{4}'.format("Here are the ", sortBy ," posts in '/R/",chosenSubreddit,"'"))
 		print('{0:4.4}|{1:6.6}|{2:8.8}|{3:100.100}'.format("Menu","Score","Comments","Title"))
 		if sortBy == 'hot':
-			for submission in reddit.subreddit(chosenSubreddit).hot(limit=displayHeight):
+			for submission in reddit.subreddit(chosenSubreddit).hot(limit=20):
 				print('{0:4}|{1:6}|{2:8}|{3:100.100}'.format(counter,submission.score,submission.num_comments,submission.title))
 				submissionIdArray.append(submission.id)
 				counter= counter + 1
 		if sortBy == 'top':
-			for submission in reddit.subreddit(chosenSubreddit).top('all',limit=displayHeight):
+			for submission in reddit.subreddit(chosenSubreddit).top('all',limit=20):
 				print('{0:4}|{1:6}|{2:8}|{3:100.100}'.format(counter,submission.score,submission.num_comments,submission.title))
 				submissionIdArray.append(submission.id)
 				counter= counter + 1
 		if sortBy == 'new':
-			for submission in reddit.subreddit(chosenSubreddit).new(limit=displayHeight):
+			for submission in reddit.subreddit(chosenSubreddit).new(limit=20):
 				print('{0:4}|{1:6}|{2:8}|{3:100.100}'.format(counter,submission.score,submission.num_comments,submission.title))
 				submissionIdArray.append(submission.id)
 				counter= counter + 1
@@ -88,9 +74,9 @@ def chooseSubreddit(sortBy,chosenSubreddit):
 	while True:
 		menu = {}
 		menu['1']="Choose post to view"
-		menu['2']="Change post sorting(Top, Hot, New)"
+		menu['2']="Change post sorting"
 		menu['3']="Choose a Different Subreddit"
-		menu['4']="Refresh Page"
+		menu['4']="Re-Display Posts"
 		while True:
 			options=menu.keys()
 			print(" ")
