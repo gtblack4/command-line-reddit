@@ -10,7 +10,7 @@ from configFile import *
 #Check to see if a user is logged in
 print("")
 try:
-	print(reddit.user.me())
+	print("Hello,", reddit.user.me(), "! Welcome to RedditCL.")
 except:
 	print("The user login failed. Please Check the configFile to ensure you have proper credentials")
 	print("Otherwise you can continue is read-only mode")
@@ -21,7 +21,9 @@ def getWindowSize():
 		displayHeight = os.get_terminal_size().lines
 	else:
 		displayHeight = os.get_terminal_size().lines - 10
-	consoleY = os.get_terminal_size().columns
+	displayWidth = os.get_terminal_size().columns
+	
+	print(displayWidth)
 
 
 #Main Menu
@@ -52,7 +54,7 @@ def Main():
 #This function takes 2 variables [SortBy] describes how to display the posts(New, Top, All) and [chosenSubreddit] which is the chosen subreddit...
 def chooseSubreddit(sortBy,chosenSubreddit):
 	#SubmissionIdArray is an array of all the submissions, when the user selects a post to view, it pulls the corresponding ID and loads the comments for that post
-
+	getWindowSize()
 	submissionIdArray = []
 	print(" ")
 	if chosenSubreddit == " ":
@@ -182,6 +184,7 @@ def commentMenu(sortBy,chosenSubreddit,submission,comment,commentIdArray):
 def viewSubmission(subId,chosenSubreddit,sortBy):
 	submission = reddit.submission(id=subId)
 	#print('{0:6}|{1:9}|{2:10.10}|{3:11}{4:89.89}'.format("Score","Author","Comment","Post Title:",submission.title))
+	lineHeight = 0
 	varX = 1
 	while varX <= (math.ceil(len(submission.title)/100)):
 			if varX == 1:
@@ -189,16 +192,17 @@ def viewSubmission(subId,chosenSubreddit,sortBy):
 			else:
 				print('{0:6}|{1:9}|{2:100}'.format(" "," ",str(submission.title[(varX-1)*97:varX*97])))
 			varX = varX + 1
+			lineHeight += 1
 	VarX=1
 	if submission.selftext:
 		subText = body = str(submission.selftext).replace('\n','')
 		while varX <= (math.ceil(len(subText)/100)):
-				if varX == 1:
-					print('{0:6}|{1:9.9}|{2:97.97}'.format(" "," ",str(subText[(varX-1)*97:varX*97])))
-				else:
-					print('{0:6}|{1:9}|{2:100}'.format(" "," ",str(subText[(varX-1)*97:varX*97])))
-				varX = varX + 1
-
+			if varX == 1:
+				print('{0:6}|{1:9.9}|{2:97.97}'.format(" "," ",str(subText[(varX-1)*97:varX*97])))
+			else:
+				print('{0:6}|{1:9}|{2:100}'.format(" "," ",str(subText[(varX-1)*97:varX*97])))
+			varX = varX + 1
+			lineHeight += 1
 	lineCount = 1
 	x = 1
 	for comment in submission.comments:
@@ -225,7 +229,7 @@ def viewSubmission(subId,chosenSubreddit,sortBy):
 			varX = varX + 1
 		print('{0:6}|{1:9}|{2:100.100}'.format('______','_________','_________________________________________________________________________________________________________'))	
 		commentIdArray.append(comment.id)
-		#This needs to be replaced with a more procedural function instead of hard coding a certain number of responses
+		#This needs to be replaced with a more dynamic function instead of hard coding a certain number of responses
 		for replies in comment.replies:
 			depth = 1
 			if isinstance(replies, MoreComments):
